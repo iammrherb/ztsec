@@ -1,3 +1,15 @@
+<#	
+	.NOTES
+	===========================================================================
+	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2023 v5.8.229
+	 Created on:   	8/23/2023 4:25 PM
+	 Created by:   	MrHerbs Blurbs	
+	 Organization: 	Votiro
+	 Filename:     	
+	===========================================================================
+	.DESCRIPTION
+		A description of the file.
+#>
 #For adding App Registration in Azure AD and Assigning proper API Permissions for Graph
 #Resources - https://docs.microsoft.com/en-us/powershell/module/az.resources/new-azadapplication?view=azps-7.4.0 | https://docs.microsoft.com/en-us/powershell/module/az.resources/add-azadapppermission?view=azps-7.4.0 | https://docs.microsoft.com/en-us/graph/permissions-reference
 
@@ -6,8 +18,8 @@
 #Install-Module AzureAD -Force
 
 #Connect to Azure Powershell
-Write-Host -f Yellow "Authenticating to your AzAccount and AzureAD target tenant" 
-Connect-AzAccount -UseDeviceAuthentication
+Write-Host -f Yellow "Authenticating to your AzAccount and AzureAD target tenant"
+Connect-AzAccount
 Connect-AzureAD
 
 #Variables and naming the new AAD Application
@@ -23,7 +35,7 @@ $AppID = Get-AzADApplication -DisplayName $AppName | Select-Object -ExpandProper
 Start-Sleep -s 5
 
 #Add required permissions for Graph API (reference: https://docs.microsoft.com/en-us/graph/permissions-reference)
-Write-Host -f Yellow "Setting $AppName API Permissions"
+Write-Host -f Yellow "Setting $AppName API Application Permissions"
 #Directory.Read.All - Application
 Add-AzADAppPermission -ObjectId $ObjectID -ApiId 00000003-0000-0000-c000-000000000000 -PermissionId 7ab1d382-f21e-4acd-a863-ba3e13f7da61 -Type Role
 #Group.Read.All - Application
@@ -38,7 +50,7 @@ Add-AzADAppPermission -ObjectId $ObjectID -ApiId 00000003-0000-0000-c000-0000000
 Add-AzADAppPermission -ObjectId $ObjectID -ApiId 00000003-0000-0000-c000-000000000000 -PermissionId df021288-bdef-4463-88db-98f22de89214 -Type Role
 #User.Read - Delegated
 Add-AzADAppPermission -ObjectId $ObjectID -ApiId 00000003-0000-0000-c000-000000000000 -PermissionId e1fe6dd8-ba31-4d61-89e7-88639da4683d
-Start-Sleep -s 8 
+Start-Sleep -s 8
 
 #Create Client Secret for secure remote access to GraphAPI
 Write-Host -f Yellow "Creating Votiro App Credentials"
@@ -46,7 +58,7 @@ $ClientSecret = Get-AzADApplication -ApplicationID $appid | New-AzADAppCredentia
 
 #Gather output variable details for the App connection:
 $TenantID = Get-AzTenant | Select-Object -ExpandProperty ID
-$ClientID = (get-azureadapplication -filter "DisplayName eq '$($AppName)'" | foreach { $_.AppID })
+$ClientID = (get-azureadapplication -filter "DisplayName eq '$($AppName)'" | ForEach-Object { $_.AppID })
 
 #Display details on screen:
 $AppConnectionDetails = "Connection details for the newly created $AppName AAD Application:
@@ -62,9 +74,9 @@ Tenant ID:          $TenantID
 
 #Obtain admin consent for new AzureAD app registration
 Write-Host -f Yellow "Press ENTER to launch Browser and obtain Consent for Microsoft Graph permissions. Use the same client credentials you previously used"
-$AppConnectionDetails 
+$AppConnectionDetails | clip
 Pause
-Start "https://login.microsoftonline.com/common/adminconsent?client_id=$ClientID&redirect_uri=https://portal.azure.com"
+Start-Process "https://login.microsoftonline.com/$TenantID/adminconsent?client_id=$ClientID&redirect_uri=https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/"
 Write-Host -f Yellow "After obtaining admin consent, press ENTER again to continue"
 Pause
 
@@ -75,3 +87,7 @@ Pause
 
 Disconnect-AzAccount
 Disconnect-AzureAD
+
+
+
+
