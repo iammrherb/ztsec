@@ -2,12 +2,12 @@
 #Resources - https://docs.microsoft.com/en-us/powershell/module/az.resources/new-azadapplication?view=azps-7.4.0 | https://docs.microsoft.com/en-us/powershell/module/az.resources/add-azadapppermission?view=azps-7.4.0 | https://docs.microsoft.com/en-us/graph/permissions-reference
 
 #Install Necessary Modules
-Install-Module AZ -Force
-Install-Module AzureAD -Force
+#Install-Module AZ -Force
+#Install-Module AzureAD -Force
 
 #Connect to Azure Powershell
 Write-Host -f Yellow "Authenticating to your AzAccount and AzureAD target tenant" 
-Connect-AzAccount
+Connect-AzAccount -UseDeviceAuthentication
 Connect-AzureAD
 
 #Variables and naming the new AAD Application
@@ -62,7 +62,7 @@ Tenant ID:          $TenantID
 
 #Obtain admin consent for new AzureAD app registration
 Write-Host -f Yellow "Press ENTER to launch Browser and obtain Consent for Microsoft Graph permissions. Use the same client credentials you previously used"
-$AppConnectionDetails | clip
+$AppConnectionDetails 
 Pause
 Start "https://login.microsoftonline.com/common/adminconsent?client_id=$ClientID&redirect_uri=https://portal.azure.com"
 Write-Host -f Yellow "After obtaining admin consent, press ENTER again to continue"
